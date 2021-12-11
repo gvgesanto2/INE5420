@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+import math
 
 ###CORES###
 CorJanela = "#D3D3D3"
@@ -15,36 +16,35 @@ ListCores = ["Preto","Verde","Azul","Vermelho","Amarelo"]
 
 
 class objeto:
-    def __init__(self, x, y,tam,cor):
+    def __init__(self, x, y,tam,cor,ang):
         self.x = x
         self.y = y
         self.tam = tam
         self.cor = cor
-
-
+        self.ang = ang
 
 
 class ponto(objeto):
-    def __init__(self, x, y,tam,cor):
-        super().__init__( x,y,tam,cor)
+    def __init__(self, x, y,tam,cor,ang):
+        super().__init__( x,y,tam,cor,ang)
     def desenha(self):
         cv.create_oval(self.x, self.y, self.x+self.tam, self.y+self.tam, fill=self.cor)
 
 
 class quadrado(objeto):
-    def __init__(self, x, y, tam,cor):
-        super().__init__( x,y,tam,cor)
+    def __init__(self, x, y, tam,cor,ang):
+        super().__init__( x,y,tam,cor,ang)
     def desenha(self):
-        cv.create_line(self.x,self.y,self.x+self.tam,self.y,fill=self.cor)
-        cv.create_line(self.x+self.tam,self.y,self.x+self.tam,self.y+self.tam,fill=self.cor)
-        cv.create_line(self.x+self.tam,self.y+self.tam, self.x, self.y + self.tam,fill=self.cor)
-        cv.create_line(self.x, self.y, self.x, self.y+self.tam,fill=self.cor)
+        cv.create_line(self.x, self.y, self.x + self.tam*math.cos(self.ang), self.y + self.tam*math.sin(self.ang), fill=self.cor)
+        cv.create_line(self.x + self.tam*math.cos(self.ang), self.y + self.tam*math.sin(self.ang), self.x + self.tam*math.cos(self.ang) - self.tam*math.sin(self.ang), self.y + self.tam*math.sin(self.ang) + self.tam*math.cos(self.ang), fill=self.cor)
+        cv.create_line(self.x + self.tam*math.cos(self.ang) - self.tam*math.sin(self.ang), self.y + self.tam*math.sin(self.ang) + self.tam*math.cos(self.ang),self.x - self.tam*math.sin(self.ang), self.y+self.tam*math.cos(self.ang),fill=self.cor)
+        cv.create_line(self.x, self.y, self.x - self.tam*math.sin(self.ang), self.y+self.tam*math.cos(self.ang),fill=self.cor)
 
 class linha(objeto):
-    def __init__(self, x, y, tam,cor):
-        super().__init__( x,y,tam,cor)
+    def __init__(self, x, y, tam,cor,ang):
+        super().__init__( x,y,tam,cor,ang)
     def desenha(self):
-        cv.create_line(self.x, self.y, self.x + self.tam,self.y,fill=self.cor)
+        cv.create_line(self.x, self.y, self.x + self.tam*math.cos(self.ang),self.y+self.tam*math.sin(self.ang),fill=self.cor)
 
 class viewport:
     def __init__(self, x, y):
@@ -91,21 +91,23 @@ class viewport:
             y=Listy[i]
             tam = ListTam[i]
             cor = Listcor[i]
+            ang = Listang[i]
             x -= self.x
             y -= self.y
             x *= self.zoom
             y *= self.zoom
             tam*=self.zoom
-            obj = tipo(x,y,tam,cor)
+            obj = tipo(x,y,tam,cor,ang)
             obj.desenha()
 
 
-def CriarPolig(tipo,x,y,tam,cor):
+def CriarPolig(tipo,x,y,tam,cor,ang):
     ListTipo.append(tipo)
     Listx.append(x)
     Listy.append(y)
     ListTam.append(tam)
     Listcor.append(cor)
+    Listang.append(ang)
 
 def transf():
     Janelaaux=Tk()
@@ -134,6 +136,17 @@ def transf():
 
         Listcor[Objeto] = cor
         vp.draw()
+        Janelaaux.destroy()
+
+    def hor():
+        Listang[Objeto] +=0.5
+        vp.draw()
+
+    def anthor():
+        Listang[Objeto] -=0.5
+        vp.draw()
+
+
 
 
 
@@ -163,6 +176,10 @@ def transf():
     CBcor.set("Esccolha uma cor")
     CBcor.place(x=100, y=100, width=250, height=25)
 
+    Labelang = Label(Janelaaux, text="Angulo").place(x=0, y=125, width=90, height=25)
+    btnhor = Button(Janelaaux, text="↻", command=hor).place(x=100, y=125, height=tamBot, width=tamBot)
+    btnanthor = Button(Janelaaux, text="↺", command=anthor).place(x=150, y=125, height=tamBot, width=tamBot)
+
 
     btnapply = Button(Janelaaux,text="aplicar",command=apply).place(x=600,y=500)
     Janelaaux.mainloop()
@@ -175,14 +192,15 @@ Listx = []
 Listy = []
 ListTam = []
 Listcor = []
+Listang = []
 
-CriarPolig(quadrado,5000,2570,50,Azul)
-CriarPolig(ponto,5900,2510,5,Amarelo)
-CriarPolig(linha,5300,2820,150,Preto)
-CriarPolig(quadrado,5100,2890,100,Vermelho)
-CriarPolig(linha,5400,2800,300,Vermelho)
-CriarPolig(quadrado,5500,2700,200,Preto)
-CriarPolig(ponto,5300,2700,20,Preto)
+CriarPolig(quadrado,5000,2570,50,Azul,0)
+CriarPolig(ponto,5900,2510,5,Amarelo,0)
+CriarPolig(linha,5300,2820,150,Preto,0)
+CriarPolig(quadrado,5100,2890,100,Vermelho,2)
+CriarPolig(linha,5400,2800,300,Vermelho,0)
+CriarPolig(quadrado,5500,2700,200,Preto,0)
+CriarPolig(ponto,5300,2700,20,Preto,0)
 
 
 
